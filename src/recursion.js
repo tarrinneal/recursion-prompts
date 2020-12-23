@@ -55,11 +55,36 @@ var isEven = function(n) {
 // sumBelow(10); // 45
 // sumBelow(7); // 21
 var sumBelow = function(n) {
+  if (n === 0) {
+    return 0;
+  }
+  if (n + Math.abs(n) === 0) {
+    return n + 1 + sumBelow(n + 1);
+  } else {
+    return n - 1 + sumBelow(n - 1);
+  }
 };
 
 // 6. Get the integers within a range (x, y).
 // range(2,9); // [3,4,5,6,7,8]
 var range = function(x, y) {
+  var result = [];
+  if (x < y) {
+    if (x + 1 >= y) {
+    return result;
+    }
+    result.push(x + 1);
+
+    result = result.concat(range(x + 1, y));
+  } else {
+    if (x - 1 <= y) {
+      return result;
+    }
+    result.push(x - 1);
+
+    result = result.concat(range(x - 1, y));
+  }
+  return result;
 };
 
 // 7. Compute the exponent of a number.
@@ -68,6 +93,17 @@ var range = function(x, y) {
 // exponent(4,3); // 64
 // https://www.khanacademy.org/computing/computer-science/algorithms/recursive-algorithms/a/computing-powers-of-a-number
 var exponent = function(base, exp) {
+  if (exp === 0) {
+    return 1;
+  }
+  if (exp < 0) {
+    return 1 / (base * exponent(base, (-exp - 1)));
+  }
+  if (exp % 2 === 0) {
+    var even = exponent(base, exp / 2);
+    return even * even;
+  }
+  return base * exponent(base, exp - 1);
 };
 
 // 8. Determine if a number is a power of two.
@@ -75,14 +111,34 @@ var exponent = function(base, exp) {
 // powerOfTwo(16); // true
 // powerOfTwo(10); // false
 var powerOfTwo = function(n) {
+  if (n === 2 || n === 1 || n === -1) {
+    return true
+  } else if (!Number.isInteger(n) || n === 0) {
+    return false;
+  }
+  return powerOfTwo(n / 2);
 };
 
 // 9. Write a function that reverses a string.
 var reverse = function(string) {
+  if (string.length === 0) {
+    return '';
+  }
+  var result = string[string.length - 1];
+  result += reverse(string.slice(0, string.length - 1))
+  return result;
 };
 
 // 10. Write a function that determines if a string is a palindrome.
 var palindrome = function(string) {
+  if (string.length === 1 || string.length === 0) {
+    return true
+  }
+  string = string.split(' ').join('').toUpperCase();
+  if (string[0] === string[string.length - 1]) {
+    return palindrome(string.slice(1, string.length - 1))
+  }
+  return false
 };
 
 // 11. Write a function that returns the remainder of x divided by y without using the
@@ -91,16 +147,64 @@ var palindrome = function(string) {
 // modulo(17,5) // 2
 // modulo(22,6) // 4
 var modulo = function(x, y) {
+  if (y === 0) {
+    return NaN;
+  }
+  if (x < 0) {
+    return -modulo(-x,  y);
+  }
+  if (y < 0) {
+    return  modulo( x, -y);
+  }
+  if (x < y) {
+    return x;
+  }
+  return modulo(x - y, y);
 };
 
+  // return modulo(x - y, y);
 // 12. Write a function that multiplies two numbers without using the * operator or
 // Math methods.
 var multiply = function(x, y) {
+  if (y === 0) {
+    return 0;
+  }
+  if (y < 0) {
+    if (x < 0) {
+      return -x + multiply(-x, -y - 1);
+    }
+    return x + multiply(-x, -y + 1);
+  }
+  return x + multiply(x, y - 1);
 };
-
 // 13. Write a function that divides two numbers without using the / operator or
 // Math methods to arrive at an approximate quotient (ignore decimal endings).
 var divide = function(x, y) {
+  if (y === 0) {
+    return NaN;
+  }
+  if (x < 0) {
+    if (y < 0) {
+      if (x > y){
+        return 0
+      }
+      return 1 + divide(-(x - y), -y)
+    }
+    if (-x < y) {
+      return 0
+    }
+    return -1 + divide(x + y, y)
+  }
+  if (y < 0) {
+    if (x < -y) {
+      return 0
+    }
+    return -1 + divide(x + y, y)
+  }
+  if (x < y) {
+    return 0
+  }
+  return 1 + divide(x - y, y);
 };
 
 // 14. Find the greatest common divisor (gcd) of two positive numbers. The GCD of two
@@ -157,6 +261,24 @@ var rMap = function(array, callback) {
 // countKeysInObj(obj, 'r') // 1
 // countKeysInObj(obj, 'e') // 2
 var countKeysInObj = function(obj, key) {
+  var clone = {...obj};
+  var result = 0;
+  var keys = Object.keys(clone);
+  if (keys.length === 0) {
+    return result;
+  }
+  if (typeof(clone[keys[0]]) === 'object') {
+    result += countKeysInObj(clone[keys[0]], key);
+  };
+  if (keys[0] === key) {
+    delete clone[keys[0]];
+    result += 1 + countKeysInObj(clone, key);
+  } else {
+    delete clone[keys[0]];
+    result += countKeysInObj(clone, key);
+  }
+
+  return result;
 };
 
 // 23. Write a function that counts the number of times a value occurs in an object.
@@ -164,11 +286,39 @@ var countKeysInObj = function(obj, key) {
 // countValuesInObj(obj, 'r') // 2
 // countValuesInObj(obj, 'e') // 1
 var countValuesInObj = function(obj, value) {
+  var clone = {...obj};
+  var result = 0;
+  var keys = Object.keys(clone);
+  if (keys.length === 0) {
+    return result;
+  }
+  if (typeof(clone[keys[0]]) === 'object') {
+    result += countValuesInObj(clone[keys[0]], value);
+  };
+  if (clone[keys[0]] === value) {
+    delete clone[keys[0]];
+    result += 1 + countValuesInObj(clone, value);
+  } else {
+    delete clone[keys[0]];
+    result += countValuesInObj(clone, value);
+  }
+  return result;
 };
 
 // 24. Find all keys in an object (and nested objects) by a provided name and rename
 // them to a provided new name while preserving the value stored at that key.
 var replaceKeysInObj = function(obj, oldKey, newKey) {
+  Object.keys(obj).map((key) => {
+    if (typeof obj[key] === 'object') {
+      replaceKeysInObj(obj[key], oldKey, newKey);
+    }
+    if (key === oldKey) {
+      obj[newKey] = obj[oldKey]
+      delete obj[oldKey];
+    }
+  });
+
+  return obj;
 };
 
 // 25. Get the first n Fibonacci numbers. In the Fibonacci sequence, each subsequent
